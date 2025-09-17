@@ -1,45 +1,75 @@
-# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+# Git
+.git
+.gitignore
 
-# Ignore git directory.
-/.git/
-/.gitignore
+# Documentation
+README.md
+DOCKER.md
 
-# Ignore bundler config.
-/.bundle
+# Logs
+log/*
+*.log
 
-# Ignore all environment files.
-/.env*
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# Ignore all default key files.
-/config/master.key
-/config/credentials/*.key
+# Coverage directory used by tools like istanbul
+coverage/
 
-# Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+# nyc test coverage
+.nyc_output
 
-# Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/.keep
+# Dependency directories
+node_modules/
 
-# Ignore storage (uploaded files in development and any SQLite databases).
-/storage/*
-!/storage/.keep
-/tmp/storage/*
-!/tmp/storage/.keep
+# Optional npm cache directory
+.npm
 
-# Ignore CI service files.
-/.github
+# Optional REPL history
+.node_repl_history
 
-# Ignore Kamal files.
-/config/deploy*.yml
-/.kamal
+# Output of 'npm pack'
+*.tgz
 
-# Ignore development files
-/.devcontainer
+# Yarn Integrity file
+.yarn-integrity
 
-# Ignore Docker-related files
-/.dockerignore
-/Dockerfile*
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test files
+spec/
+test/
+
+# Storage
+storage/
+
+# Cache
+.cache/
