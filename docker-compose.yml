@@ -12,6 +12,7 @@ services:
     volumes:
       - .:/rails
       - bundle_cache:/usr/local/bundle
+    user: "1000:1000"
     command: >
       sh -c "
         bundle install &&

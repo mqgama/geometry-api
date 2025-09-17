@@ -59,4 +59,10 @@ group :development, :test do
 
   # Database cleaner for tests
   gem "database_cleaner-active_record"
+
+  # Code coverage
+  gem "simplecov", require: false
+
+  # Shoulda matchers for testing validations and associations
+  gem "shoulda-matchers"
 end
