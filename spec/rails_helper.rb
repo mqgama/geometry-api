@@ -76,6 +76,17 @@ RSpec.configure do |config|
 
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
+
+  # Disable CSRF protection in request specs
+  config.before(:each, type: :request) do
+    allow_any_instance_of(ActionController::Base).to receive(:protect_against_forgery?).and_return(false)
+    allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token).and_return(nil)
+  end
+
+  # Allow test host in request specs
+  config.before(:each, type: :request) do
+    Rails.application.config.hosts << "localhost"
+  end
 end
 
 # Configure Shoulda Matchers
