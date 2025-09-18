@@ -83,7 +83,7 @@ RSpec.describe Circle, type: :model do
         center_y: 200.0,
         diameter: 50.0
       )
-      
+
       expect(circle).to be_persisted
       expect(circle.frame).to eq(frame)
       expect(circle.center_x).to eq(100.0)
@@ -96,7 +96,7 @@ RSpec.describe Circle, type: :model do
     it 'prevents creation with non-existent frame_id' do
       expect {
         Circle.create!(
-          frame_id: 99999, # non-existent ID
+          frame_id: 99999,
           center_x: 100.0,
           center_y: 100.0,
           diameter: 50.0
@@ -183,7 +183,7 @@ RSpec.describe Circle, type: :model do
     it 'can have multiple circles in the same frame' do
       circle1 = create(:circle, frame: frame)
       circle2 = create(:circle, frame: frame)
-      
+
       expect(frame.circles.count).to eq(2)
       expect(frame.circles).to include(circle1, circle2)
     end
@@ -201,6 +201,80 @@ RSpec.describe Circle, type: :model do
     it 'does not affect the frame when deleted' do
       circle.destroy
       expect(Frame.exists?(frame.id)).to be_truthy
+    end
+  end
+
+  describe 'validation error messages' do
+    it 'provides specific error messages for each validation' do
+      circle = Circle.new
+      circle.valid?
+
+      expect(circle.errors[:center_x]).to include("can't be blank")
+      expect(circle.errors[:center_y]).to include("can't be blank")
+      expect(circle.errors[:diameter]).to include("can't be blank")
+      expect(circle.errors[:frame]).to include('must exist')
+    end
+
+    it 'provides numericality error messages' do
+      frame = create(:frame)
+      circle = Circle.new(
+        frame: frame,
+        center_x: 100.0,
+        center_y: 100.0,
+        diameter: -10.0
+      )
+      circle.valid?
+
+      expect(circle.errors[:diameter]).to include('must be greater than 0')
+    end
+  end
+
+  describe 'model methods' do
+    let(:frame) { create(:frame) }
+    let(:circle) { create(:circle, frame: frame, center_x: 50.0, center_y: 75.0, diameter: 25.0) }
+
+    it 'responds to all expected methods' do
+      expect(circle).to respond_to(:center_x)
+      expect(circle).to respond_to(:center_y)
+      expect(circle).to respond_to(:diameter)
+      expect(circle).to respond_to(:frame)
+      expect(circle).to respond_to(:frame_id)
+      expect(circle).to respond_to(:created_at)
+      expect(circle).to respond_to(:updated_at)
+    end
+
+    it 'has correct attribute values' do
+      expect(circle.center_x).to eq(50.0)
+      expect(circle.center_y).to eq(75.0)
+      expect(circle.diameter).to eq(25.0)
+      expect(circle.frame).to eq(frame)
+    end
+  end
+
+  describe 'associations behavior' do
+    let(:frame) { create(:frame) }
+
+    it 'maintains association integrity' do
+      circle1 = create(:circle, frame: frame)
+      circle2 = create(:circle, frame: frame)
+
+      frame.reload
+
+      expect(frame.circles.count).to eq(2)
+      expect(frame.circles).to include(circle1, circle2)
+      expect(circle1.frame).to eq(frame)
+      expect(circle2.frame).to eq(frame)
+    end
+
+    it 'handles association updates correctly' do
+      circle = create(:circle, frame: frame)
+      new_frame = create(:frame)
+
+      circle.update!(frame: new_frame)
+
+      expect(circle.frame).to eq(new_frame)
+      expect(new_frame.circles).to include(circle)
+      expect(frame.circles).not_to include(circle)
     end
   end
 end

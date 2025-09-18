@@ -5,7 +5,7 @@ RSpec.describe Frame, type: :model do
     it 'should have many circles with dependent restrict_with_error' do
       frame = create(:frame)
       expect(frame.circles).to be_empty
-      
+
       circle = create(:circle, frame: frame)
       expect(frame.circles).to include(circle)
     end
@@ -80,7 +80,7 @@ RSpec.describe Frame, type: :model do
         width: 300.0,
         height: 400.0
       )
-      
+
       expect(frame).to be_persisted
       expect(frame.center_x).to eq(100.0)
       expect(frame.center_y).to eq(200.0)
@@ -91,14 +91,11 @@ RSpec.describe Frame, type: :model do
 
   describe 'dependent: :restrict_with_error' do
     let(:frame) { create(:frame) }
-    
+
     it 'prevents deletion when circles exist' do
       create(:circle, frame: frame)
-      
-      # Note: dependent: :restrict_with_error may not work as expected in all Rails versions
-      # This test documents the current behavior
+
       expect { frame.destroy }.not_to raise_error
-      # The frame should still exist because circles prevent deletion
       expect(Frame.exists?(frame.id)).to be_truthy
     end
 
@@ -171,6 +168,52 @@ RSpec.describe Frame, type: :model do
       )
       expect(frame).not_to be_valid
       expect(frame.errors[:height]).to include('must be greater than 0')
+    end
+  end
+
+  describe 'validation error messages' do
+    it 'provides specific error messages for each validation' do
+      frame = Frame.new
+      frame.valid?
+
+      expect(frame.errors[:center_x]).to include("can't be blank")
+      expect(frame.errors[:center_y]).to include("can't be blank")
+      expect(frame.errors[:width]).to include("can't be blank")
+      expect(frame.errors[:height]).to include("can't be blank")
+    end
+
+    it 'provides numericality error messages' do
+      frame = Frame.new(
+        center_x: 100.0,
+        center_y: 100.0,
+        width: -10.0,
+        height: -5.0
+      )
+      frame.valid?
+
+      expect(frame.errors[:width]).to include('must be greater than 0')
+      expect(frame.errors[:height]).to include('must be greater than 0')
+    end
+  end
+
+  describe 'model methods' do
+    let(:frame) { create(:frame, center_x: 100.0, center_y: 200.0, width: 300.0, height: 400.0) }
+
+    it 'responds to all expected methods' do
+      expect(frame).to respond_to(:center_x)
+      expect(frame).to respond_to(:center_y)
+      expect(frame).to respond_to(:width)
+      expect(frame).to respond_to(:height)
+      expect(frame).to respond_to(:circles)
+      expect(frame).to respond_to(:created_at)
+      expect(frame).to respond_to(:updated_at)
+    end
+
+    it 'has correct attribute values' do
+      expect(frame.center_x).to eq(100.0)
+      expect(frame.center_y).to eq(200.0)
+      expect(frame.width).to eq(300.0)
+      expect(frame.height).to eq(400.0)
     end
   end
 end

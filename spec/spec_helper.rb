@@ -23,14 +23,14 @@ SimpleCov.start 'rails' do
   add_filter '/db/'
   add_filter '/lib/'
   add_filter '/vendor/'
-  
+  add_filter '/app/models/application_record.rb'
+  add_filter '/app/controllers/application_controller.rb'
+  add_filter '/app/jobs/application_job.rb'
+  add_filter '/app/mailers/application_mailer.rb'
+
   add_group 'Models', 'app/models'
-  add_group 'Controllers', 'app/controllers'
-  add_group 'Helpers', 'app/helpers'
-  add_group 'Jobs', 'app/jobs'
-  add_group 'Mailers', 'app/mailers'
-  
-  minimum_coverage 80
+
+  minimum_coverage 90
 end
 
 RSpec.configure do |config|
