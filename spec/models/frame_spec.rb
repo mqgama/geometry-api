@@ -197,7 +197,7 @@ RSpec.describe Frame, type: :model do
   end
 
   describe 'model methods' do
-    let(:frame) { create(:frame, center_x: 100.0, center_y: 200.0, width: 300.0, height: 400.0) }
+    let(:frame) { build(:frame, center_x: 100.0, center_y: 200.0, width: 300.0, height: 400.0) }
 
     it 'responds to all expected methods' do
       expect(frame).to respond_to(:center_x)
@@ -214,6 +214,31 @@ RSpec.describe Frame, type: :model do
       expect(frame.center_y).to eq(200.0)
       expect(frame.width).to eq(300.0)
       expect(frame.height).to eq(400.0)
+    end
+
+    describe 'boundary methods' do
+      it 'calculates left boundary correctly' do
+        expect(frame.left).to eq(-50.0)
+      end
+
+      it 'calculates right boundary correctly' do
+        expect(frame.right).to eq(250.0)
+      end
+
+      it 'calculates top boundary correctly' do
+        expect(frame.top).to eq(400.0)
+      end
+
+      it 'calculates bottom boundary correctly' do
+        expect(frame.bottom).to eq(0.0)
+      end
+
+      it 'maintains correct relationships between boundaries' do
+        expect(frame.right - frame.left).to eq(frame.width)
+        expect(frame.top - frame.bottom).to eq(frame.height)
+        expect(frame.left + frame.width / 2).to eq(frame.center_x)
+        expect(frame.bottom + frame.height / 2).to eq(frame.center_y)
+      end
     end
   end
 end

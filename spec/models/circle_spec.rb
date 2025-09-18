@@ -230,8 +230,8 @@ RSpec.describe Circle, type: :model do
   end
 
   describe 'model methods' do
-    let(:frame) { create(:frame) }
-    let(:circle) { create(:circle, frame: frame, center_x: 50.0, center_y: 75.0, diameter: 25.0) }
+    let(:frame) { build(:frame) }
+    let(:circle) { build(:circle, frame: frame, center_x: 50.0, center_y: 75.0, diameter: 25.0) }
 
     it 'responds to all expected methods' do
       expect(circle).to respond_to(:center_x)
@@ -248,6 +248,35 @@ RSpec.describe Circle, type: :model do
       expect(circle.center_y).to eq(75.0)
       expect(circle.diameter).to eq(25.0)
       expect(circle.frame).to eq(frame)
+    end
+
+    describe 'boundary methods' do
+      it 'calculates radius correctly' do
+        expect(circle.radius).to eq(12.5)
+      end
+
+      it 'calculates left boundary correctly' do
+        expect(circle.left).to eq(37.5)
+      end
+
+      it 'calculates right boundary correctly' do
+        expect(circle.right).to eq(62.5)
+      end
+
+      it 'calculates top boundary correctly' do
+        expect(circle.top).to eq(87.5)
+      end
+
+      it 'calculates bottom boundary correctly' do
+        expect(circle.bottom).to eq(62.5)
+      end
+
+      it 'maintains correct relationships between boundaries' do
+        expect(circle.right - circle.left).to eq(circle.diameter)
+        expect(circle.top - circle.bottom).to eq(circle.diameter)
+        expect(circle.left + circle.radius).to eq(circle.center_x)
+        expect(circle.bottom + circle.radius).to eq(circle.center_y)
+      end
     end
   end
 
