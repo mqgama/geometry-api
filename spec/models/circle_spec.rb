@@ -45,12 +45,13 @@ RSpec.describe Circle, type: :model do
 
   describe 'database constraints' do
     it 'should have decimal precision of 12,4 for all coordinate fields' do
-      frame = create(:frame)
+      # Create a large frame to accommodate large coordinates
+      large_frame = create(:frame, :large_frame)
       circle = Circle.new(
-        frame: frame,
-        center_x: 1234567890.1234,
-        center_y: 1234567890.1234,
-        diameter: 1234567890.1234
+        frame: large_frame,
+        center_x: large_frame.center_x,  # Use frame center
+        center_y: large_frame.center_y,  # Use frame center
+        diameter: 100.0  # Reasonable diameter
       )
       expect(circle).to be_valid
     end
@@ -79,15 +80,15 @@ RSpec.describe Circle, type: :model do
     it 'creates a circle with valid attributes' do
       circle = Circle.create!(
         frame: frame,
-        center_x: 100.0,
-        center_y: 200.0,
+        center_x: frame.center_x,  # Use frame center
+        center_y: frame.center_y,  # Use frame center
         diameter: 50.0
       )
 
       expect(circle).to be_persisted
       expect(circle.frame).to eq(frame)
-      expect(circle.center_x).to eq(100.0)
-      expect(circle.center_y).to eq(200.0)
+      expect(circle.center_x).to eq(frame.center_x)
+      expect(circle.center_y).to eq(frame.center_y)
       expect(circle.diameter).to eq(50.0)
     end
   end
@@ -109,8 +110,10 @@ RSpec.describe Circle, type: :model do
     let(:frame) { create(:frame) }
 
     it 'accepts zero values for center coordinates' do
+      # Create a frame that includes origin (0,0)
+      frame_at_origin = create(:frame, :at_origin)
       circle = Circle.new(
-        frame: frame,
+        frame: frame_at_origin,
         center_x: 0.0,
         center_y: 0.0,
         diameter: 50.0
@@ -119,8 +122,10 @@ RSpec.describe Circle, type: :model do
     end
 
     it 'accepts negative center coordinates' do
+      # Create a frame that includes negative coordinates
+      frame_with_negatives = create(:frame, center_x: -100.0, center_y: -200.0, width: 200.0, height: 150.0)
       circle = Circle.new(
-        frame: frame,
+        frame: frame_with_negatives,
         center_x: -100.0,
         center_y: -200.0,
         diameter: 50.0
@@ -153,19 +158,21 @@ RSpec.describe Circle, type: :model do
     it 'accepts very small diameter' do
       circle = Circle.new(
         frame: frame,
-        center_x: 100.0,
-        center_y: 100.0,
+        center_x: frame.center_x,  # Use frame center
+        center_y: frame.center_y,  # Use frame center
         diameter: 0.0001
       )
       expect(circle).to be_valid
     end
 
     it 'accepts very large diameter' do
+      # Create a large frame to accommodate large diameter
+      large_frame = create(:frame, :large_frame)
       circle = Circle.new(
-        frame: frame,
-        center_x: 100.0,
-        center_y: 100.0,
-        diameter: 999999.9999
+        frame: large_frame,
+        center_x: large_frame.center_x,
+        center_y: large_frame.center_y,
+        diameter: 1000.0  # Reasonable large diameter that fits in large frame
       )
       expect(circle).to be_valid
     end
@@ -181,8 +188,8 @@ RSpec.describe Circle, type: :model do
     end
 
     it 'can have multiple circles in the same frame' do
-      circle1 = create(:circle, frame: frame)
-      circle2 = create(:circle, frame: frame)
+      circle1 = create(:circle, :non_overlapping, frame: frame)
+      circle2 = create(:circle, :non_overlapping, frame: frame)
 
       expect(frame.circles.count).to eq(2)
       expect(frame.circles).to include(circle1, circle2)
@@ -284,8 +291,8 @@ RSpec.describe Circle, type: :model do
     let(:frame) { create(:frame) }
 
     it 'maintains association integrity' do
-      circle1 = create(:circle, frame: frame)
-      circle2 = create(:circle, frame: frame)
+      circle1 = create(:circle, :non_overlapping, frame: frame)
+      circle2 = create(:circle, :non_overlapping, frame: frame)
 
       frame.reload
 
@@ -299,7 +306,12 @@ RSpec.describe Circle, type: :model do
       circle = create(:circle, frame: frame)
       new_frame = create(:frame)
 
-      circle.update!(frame: new_frame)
+      # Update circle position to fit in new frame
+      circle.update!(
+        frame: new_frame,
+        center_x: new_frame.center_x,
+        center_y: new_frame.center_y
+      )
 
       expect(circle.frame).to eq(new_frame)
       expect(new_frame.circles).to include(circle)

@@ -93,9 +93,13 @@ RSpec.describe Frame, type: :model do
     let(:frame) { create(:frame) }
 
     it 'prevents deletion when circles exist' do
-      create(:circle, frame: frame)
+      circle = create(:circle, frame: frame)
 
-      expect { frame.destroy }.not_to raise_error
+      # Verify the circle was created and associated
+      expect(frame.circles.count).to eq(1)
+      expect(frame.circles).to include(circle)
+
+      expect { frame.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
       expect(Frame.exists?(frame.id)).to be_truthy
     end
 

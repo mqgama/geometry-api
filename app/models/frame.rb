@@ -1,5 +1,5 @@
 class Frame < ApplicationRecord
-  has_many :circles, dependent: :restrict_with_error
+  has_many :circles, dependent: :restrict_with_exception
 
   validates :center_x, presence: true
   validates :center_y, presence: true

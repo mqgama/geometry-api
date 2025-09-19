@@ -77,15 +77,18 @@ RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
 
-  # Disable CSRF protection in request specs
+  # Disable CSRF protection in request specs (not needed for API-only apps)
   config.before(:each, type: :request) do
-    allow_any_instance_of(ActionController::Base).to receive(:protect_against_forgery?).and_return(false)
-    allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token).and_return(nil)
+    # ActionController::API doesn't implement CSRF protection by default
+    # so we don't need to disable it
   end
 
   # Allow test host in request specs
   config.before(:each, type: :request) do
-    Rails.application.config.hosts << "localhost"
+    # Disable host authorization completely for tests
+    Rails.application.config.hosts.clear
+    Rails.application.config.hosts << nil  # Allow all hosts
+    host! "localhost"
   end
 end
 

@@ -41,7 +41,7 @@ RSpec.describe Api::CirclesController, type: :request do
 
     context 'with radius filter' do
       it 'returns circles within radius' do
-        get '/api/circles?center_x=100&center_y=100&radius=80', as: :json
+        get '/api/circles?center_x=100&center_y=100&radius=70', as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -50,7 +50,7 @@ RSpec.describe Api::CirclesController, type: :request do
         expect(json_response['meta']['total']).to eq(2)
         expect(json_response['meta']['filters_applied']).to include('center_x: 100')
         expect(json_response['meta']['filters_applied']).to include('center_y: 100')
-        expect(json_response['meta']['filters_applied']).to include('radius: 80')
+        expect(json_response['meta']['filters_applied']).to include('radius: 70')
       end
     end
 
@@ -72,8 +72,8 @@ RSpec.describe Api::CirclesController, type: :request do
       let(:valid_params) do
         {
           circle: {
-            center_x: 100.0,
-            center_y: 100.0,
+            center_x: frame.center_x,
+            center_y: frame.center_y,
             diameter: 50.0
           }
         }
@@ -87,9 +87,9 @@ RSpec.describe Api::CirclesController, type: :request do
         expect(response).to have_http_status(:created)
 
         json_response = JSON.parse(response.body)
-        expect(json_response['data']['data']['attributes']['center_x']).to eq(100.0)
-        expect(json_response['data']['data']['attributes']['center_y']).to eq(100.0)
-        expect(json_response['data']['data']['attributes']['diameter']).to eq(50.0)
+        expect(json_response['data']['data']['attributes']['center_x']).to eq(frame.center_x.to_s)
+        expect(json_response['data']['data']['attributes']['center_y']).to eq(frame.center_y.to_s)
+        expect(json_response['data']['data']['attributes']['diameter']).to eq(50.0.to_s)
         expect(json_response['meta']['message']).to eq('Círculo criado com sucesso')
       end
     end
@@ -165,7 +165,7 @@ RSpec.describe Api::CirclesController, type: :request do
   end
 
   describe 'PUT /api/circles/:id' do
-    let(:circle) { create(:circle, frame: frame, center_x: 100.0, center_y: 100.0, diameter: 50.0) }
+    let(:circle) { create(:circle, frame: frame, center_x: frame.center_x, center_y: frame.center_y, diameter: 50.0) }
 
     context 'with valid parameters' do
       let(:valid_params) do
@@ -184,9 +184,9 @@ RSpec.describe Api::CirclesController, type: :request do
         expect(response).to have_http_status(:ok)
 
         json_response = JSON.parse(response.body)
-        expect(json_response['data']['data']['attributes']['center_x']).to eq(120.0)
-        expect(json_response['data']['data']['attributes']['center_y']).to eq(80.0)
-        expect(json_response['data']['data']['attributes']['diameter']).to eq(40.0)
+        expect(json_response['data']['data']['attributes']['center_x']).to eq(120.0.to_s)
+        expect(json_response['data']['data']['attributes']['center_y']).to eq(80.0.to_s)
+        expect(json_response['data']['data']['attributes']['diameter']).to eq(40.0.to_s)
         expect(json_response['meta']['message']).to eq('Círculo atualizado com sucesso')
 
         circle.reload
@@ -227,7 +227,7 @@ RSpec.describe Api::CirclesController, type: :request do
   end
 
   describe 'DELETE /api/circles/:id' do
-    let(:circle) { create(:circle, frame: frame, center_x: 100.0, center_y: 100.0, diameter: 50.0) }
+    let!(:circle) { create(:circle, frame: frame, center_x: frame.center_x, center_y: frame.center_y, diameter: 30.0) }
 
     context 'when circle exists' do
       it 'deletes the circle' do

@@ -22,7 +22,7 @@ module ApiErrorHandler
     render_error(
       message: "Dados inválidos",
       details: exception.record.errors.full_messages,
-      status: :unprocessable_entity
+      status: :unprocessable_content
     )
   end
 
@@ -30,7 +30,7 @@ module ApiErrorHandler
     render_error(
       message: "Não é possível excluir o registro",
       details: "Existem registros associados que impedem a exclusão",
-      status: :unprocessable_entity
+      status: :unprocessable_content
     )
   end
 
