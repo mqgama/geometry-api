@@ -1,4 +1,5 @@
-class Api::CirclesController < ApiController
+class Api::V1::CirclesController < ApiController
+  before_action :authenticate_user!
   before_action :set_circle, only: [ :update, :destroy ]
 
   def index

@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe Api::CirclesController, type: :request do
+RSpec.describe Api::V1::CirclesController, type: :request do
   let(:frame) { create(:frame, center_x: 100.0, center_y: 100.0, width: 200.0, height: 150.0) }
 
-  describe 'GET /api/circles' do
+  describe 'GET /api/v1/circles' do
   before do
     create(:circle, frame: frame, center_x: 100.0, center_y: 100.0, diameter: 50.0)
     create(:circle, frame: frame, center_x: 150.0, center_y: 80.0, diameter: 30.0)
@@ -12,7 +12,7 @@ RSpec.describe Api::CirclesController, type: :request do
 
     context 'without filters' do
       it 'returns all circles' do
-        get '/api/circles', as: :json
+        get '/api/v1/circles', headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -28,7 +28,7 @@ RSpec.describe Api::CirclesController, type: :request do
       before { create(:circle, frame: other_frame) }
 
       it 'returns circles from specific frame' do
-        get "/api/circles?frame_id=#{frame.id}", as: :json
+        get "/api/v1/circles?frame_id=#{frame.id}", headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -41,7 +41,7 @@ RSpec.describe Api::CirclesController, type: :request do
 
     context 'with radius filter' do
       it 'returns circles within radius' do
-        get '/api/circles?center_x=100&center_y=100&radius=70', as: :json
+        get '/api/v1/circles?center_x=100&center_y=100&radius=70', headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -56,7 +56,7 @@ RSpec.describe Api::CirclesController, type: :request do
 
     context 'with no matching circles' do
       it 'returns empty result' do
-        get '/api/circles?center_x=500&center_y=500&radius=10', as: :json
+        get '/api/v1/circles?center_x=500&center_y=500&radius=10', headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -67,7 +67,7 @@ RSpec.describe Api::CirclesController, type: :request do
     end
   end
 
-  describe 'POST /api/frames/:frame_id/circles' do
+  describe 'POST /api/v1/frames/:frame_id/circles' do
     context 'with valid parameters' do
       let(:valid_params) do
         {
@@ -81,7 +81,7 @@ RSpec.describe Api::CirclesController, type: :request do
 
       it 'creates a new circle' do
         expect {
-          post "/api/frames/#{frame.id}/circles", params: valid_params, as: :json
+          post "/api/v1/frames/#{frame.id}/circles", params: valid_params, headers: auth_headers, as: :json
         }.to change(Circle, :count).by(1)
 
         expect(response).to have_http_status(:created)
@@ -106,7 +106,7 @@ RSpec.describe Api::CirclesController, type: :request do
       end
 
       it 'returns validation errors' do
-        post "/api/frames/#{frame.id}/circles", params: invalid_params, as: :json
+        post "/api/v1/frames/#{frame.id}/circles", params: invalid_params, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:unprocessable_content)
 
@@ -129,7 +129,7 @@ RSpec.describe Api::CirclesController, type: :request do
       end
 
       it 'returns boundary error' do
-        post "/api/frames/#{frame.id}/circles", params: invalid_params, as: :json
+        post "/api/v1/frames/#{frame.id}/circles", params: invalid_params, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:unprocessable_content)
 
@@ -153,7 +153,7 @@ RSpec.describe Api::CirclesController, type: :request do
       end
 
       it 'returns collision error' do
-        post "/api/frames/#{frame.id}/circles", params: colliding_params, as: :json
+        post "/api/v1/frames/#{frame.id}/circles", params: colliding_params, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:unprocessable_content)
 
@@ -164,7 +164,7 @@ RSpec.describe Api::CirclesController, type: :request do
     end
   end
 
-  describe 'PUT /api/circles/:id' do
+  describe 'PUT /api/v1/circles/:id' do
     let(:circle) { create(:circle, frame: frame, center_x: frame.center_x, center_y: frame.center_y, diameter: 50.0) }
 
     context 'with valid parameters' do
@@ -179,7 +179,7 @@ RSpec.describe Api::CirclesController, type: :request do
       end
 
       it 'updates the circle' do
-        put "/api/circles/#{circle.id}", params: valid_params, as: :json
+        put "/api/v1/circles/#{circle.id}", params: valid_params, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -208,7 +208,7 @@ RSpec.describe Api::CirclesController, type: :request do
       end
 
       it 'returns validation errors' do
-        put "/api/circles/#{circle.id}", params: invalid_params, as: :json
+        put "/api/v1/circles/#{circle.id}", params: invalid_params, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:unprocessable_content)
 
@@ -219,20 +219,20 @@ RSpec.describe Api::CirclesController, type: :request do
 
     context 'when circle does not exist' do
       it 'returns not found error' do
-        put '/api/circles/999', params: { circle: { center_x: 100.0 } }, as: :json
+        put '/api/v1/circles/999', params: { circle: { center_x: 100.0 } }, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:not_found)
       end
     end
   end
 
-  describe 'DELETE /api/circles/:id' do
+  describe 'DELETE /api/v1/circles/:id' do
     let!(:circle) { create(:circle, frame: frame, center_x: frame.center_x, center_y: frame.center_y, diameter: 30.0) }
 
     context 'when circle exists' do
       it 'deletes the circle' do
         expect {
-          delete "/api/circles/#{circle.id}", as: :json
+          delete "/api/v1/circles/#{circle.id}", headers: auth_headers, as: :json
         }.to change(Circle, :count).by(-1)
 
         expect(response).to have_http_status(:no_content)
@@ -241,7 +241,7 @@ RSpec.describe Api::CirclesController, type: :request do
 
     context 'when circle does not exist' do
       it 'returns not found error' do
-        delete '/api/circles/999', as: :json
+        delete '/api/v1/circles/999', headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:not_found)
       end

@@ -1,4 +1,5 @@
-class Api::FramesController < ApiController
+class Api::V1::FramesController < ApiController
+  before_action :authenticate_user!
   before_action :set_frame, only: [ :show, :destroy ]
 
   def create

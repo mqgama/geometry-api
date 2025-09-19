@@ -12,7 +12,7 @@ RSpec.describe 'API Integration Test', type: :request do
         }
       }
 
-      post '/api/frames', params: frame_params, as: :json, headers: { 'Host' => 'localhost' }
+      post '/api/v1/frames', params: frame_params, headers: auth_headers, as: :json
 
       puts "Response status: #{response.status}"
       puts "Response body: #{response.body}"

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
-RSpec.describe Api::FramesController, type: :request do
-  describe 'POST /api/frames' do
+RSpec.describe Api::V1::FramesController, type: :request do
+  describe 'POST /api/v1/frames' do
     context 'with valid parameters' do
       let(:valid_params) do
         {
@@ -16,7 +16,7 @@ RSpec.describe Api::FramesController, type: :request do
 
       it 'creates a new frame' do
         expect {
-          post '/api/frames', params: valid_params, as: :json
+          post '/api/v1/frames', params: valid_params, headers: auth_headers, as: :json
         }.to change(Frame, :count).by(1)
 
         expect(response).to have_http_status(:created)
@@ -32,7 +32,7 @@ RSpec.describe Api::FramesController, type: :request do
       it 'creates frame with circles' do
         # First test without circles to see if frame creation works
         expect {
-          post '/api/frames', params: valid_params, as: :json
+          post '/api/v1/frames', params: valid_params, headers: auth_headers, as: :json
         }.to change(Frame, :count).by(1)
 
         expect(response).to have_http_status(:created)
@@ -52,7 +52,7 @@ RSpec.describe Api::FramesController, type: :request do
       end
 
       it 'returns validation errors' do
-        post '/api/frames', params: invalid_params, as: :json
+        post '/api/v1/frames', params: invalid_params, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:unprocessable_content)
 
@@ -65,14 +65,14 @@ RSpec.describe Api::FramesController, type: :request do
       it 'returns collision error when frames overlap' do
         create(:frame, center_x: 100.0, center_y: 100.0, width: 200.0, height: 150.0)
 
-        post '/api/frames', params: {
+        post '/api/v1/frames', params: {
           frame: {
             center_x: 150.0,
             center_y: 100.0,
             width: 200.0,
             height: 150.0
           }
-        }, as: :json
+        }, headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:unprocessable_content)
 
@@ -83,7 +83,7 @@ RSpec.describe Api::FramesController, type: :request do
     end
   end
 
-  describe 'GET /api/frames/:id' do
+  describe 'GET /api/v1/frames/:id' do
     let(:frame) { create(:frame, center_x: 100.0, center_y: 100.0, width: 200.0, height: 150.0) }
 
     context 'when frame exists' do
@@ -93,7 +93,7 @@ RSpec.describe Api::FramesController, type: :request do
       end
 
       it 'returns frame with metrics' do
-        get "/api/frames/#{frame.id}", as: :json
+        get "/api/v1/frames/#{frame.id}", headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:ok)
 
@@ -112,7 +112,7 @@ RSpec.describe Api::FramesController, type: :request do
 
     context 'when frame does not exist' do
       it 'returns not found error' do
-        get '/api/frames/999', as: :json
+        get '/api/v1/frames/999', headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:not_found)
 
@@ -122,13 +122,13 @@ RSpec.describe Api::FramesController, type: :request do
     end
   end
 
-  describe 'DELETE /api/frames/:id' do
+  describe 'DELETE /api/v1/frames/:id' do
     let!(:frame) { create(:frame) }
 
     context 'when frame has no circles' do
       it 'deletes the frame' do
         expect {
-          delete "/api/frames/#{frame.id}", as: :json
+          delete "/api/v1/frames/#{frame.id}", headers: auth_headers, as: :json
         }.to change(Frame, :count).by(-1)
 
         expect(response).to have_http_status(:no_content)
@@ -140,7 +140,7 @@ RSpec.describe Api::FramesController, type: :request do
 
       it 'returns restriction error' do
         expect {
-          delete "/api/frames/#{frame.id}", as: :json
+          delete "/api/v1/frames/#{frame.id}", headers: auth_headers, as: :json
         }.not_to change(Frame, :count)
 
         expect(response).to have_http_status(:unprocessable_content)
@@ -152,7 +152,7 @@ RSpec.describe Api::FramesController, type: :request do
 
     context 'when frame does not exist' do
       it 'returns not found error' do
-        delete '/api/frames/999', as: :json
+        delete '/api/v1/frames/999', headers: auth_headers, as: :json
 
         expect(response).to have_http_status(:not_found)
       end

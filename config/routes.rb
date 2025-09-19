@@ -7,11 +7,23 @@ Rails.application.routes.draw do
 
   # API Routes
   namespace :api do
-    resources :frames, only: [ :create, :show, :destroy ] do
-      resources :circles, only: [ :create ], controller: "circles"
-    end
+    namespace :v1 do
+      # RESTful Authentication routes
+      resources :users, only: [ :create ]
+      resources :sessions, only: [ :create, :show, :destroy ] do
+        collection do
+          get :current
+          delete :destroy
+        end
+      end
 
-    resources :circles, only: [ :index, :update, :destroy ]
+      # Protected routes
+      resources :frames, only: [ :create, :show, :destroy ] do
+        resources :circles, only: [ :create ], controller: "circles"
+      end
+
+      resources :circles, only: [ :index, :update, :destroy ]
+    end
   end
 
   # Defines the root path route ("/")

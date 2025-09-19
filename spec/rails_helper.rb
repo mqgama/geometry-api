@@ -24,9 +24,16 @@ require 'rspec/rails'
 # require only the support files necessary.
 #
 # Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
+Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
 
 # Configure Shoulda Matchers
 require 'shoulda/matchers'
+
+# Configure Database Cleaner
+require 'database_cleaner/active_record'
+
+# Disable Database Cleaner safeguards for test environment
+DatabaseCleaner.allow_remote_database_url = true
 
 # Ensures that the test database schema matches the current schema file.
 # If there are pending migrations it will invoke `db:test:prepare` to
@@ -47,7 +54,7 @@ RSpec.configure do |config|
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
-  config.use_transactional_fixtures = true
+  config.use_transactional_fixtures = false
 
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
@@ -77,6 +84,9 @@ RSpec.configure do |config|
   # Include FactoryBot methods
   config.include FactoryBot::Syntax::Methods
 
+  # Include authentication helper
+  config.include AuthenticationHelper
+
   # Disable CSRF protection in request specs (not needed for API-only apps)
   config.before(:each, type: :request) do
     # ActionController::API doesn't implement CSRF protection by default
@@ -89,6 +99,18 @@ RSpec.configure do |config|
     Rails.application.config.hosts.clear
     Rails.application.config.hosts << nil  # Allow all hosts
     host! "localhost"
+  end
+
+  # Database Cleaner configuration
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation, except: %w[ar_internal_metadata schema_migrations])
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
   end
 end
 
