@@ -45,6 +45,18 @@ paths:
         description: Raio de busca
         schema:
           type: number
+      - name: page
+        in: query
+        required: false
+        description: 'Número da página (padrão: 1)'
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        required: false
+        description: 'Itens por página (padrão: 20, máximo: 100)'
+        schema:
+          type: integer
       responses:
         '200':
           description: Lista de círculos retornada com sucesso
