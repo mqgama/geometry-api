@@ -1,6 +1,133 @@
-require 'rails_helper'
+require 'swagger_helper'
 
 RSpec.describe Api::V1::SessionsController, type: :request do
+  path '/api/v1/sessions' do
+    post 'Realiza login do usuário' do
+      tags 'Authentication'
+      description 'Autentica um usuário e retorna um token JWT'
+      consumes 'application/json'
+      produces 'application/json'
+
+      parameter name: :user, in: :body, schema: {
+        type: :object,
+        properties: {
+          user: {
+            type: :object,
+            properties: {
+              email: { type: :string, example: 'login_test@example.com' },
+              password: { type: :string, example: 'password123' }
+            },
+            required: [ 'email', 'password' ]
+          }
+        },
+        required: [ 'user' ]
+      }
+
+      response '200', 'Login realizado com sucesso' do
+        let(:user) do
+          {
+            user: {
+              email: 'login_test@example.com',
+              password: 'password123'
+            }
+          }
+        end
+
+        before do
+          create(:user, email: 'login_test@example.com', password: 'password123')
+        end
+
+        run_test! do |response|
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response['data']['user']['data']['attributes']['email']).to eq('login_test@example.com')
+          expect(json_response['data']['token']).to be_present
+          expect(json_response['meta']['message']).to eq('Login realizado com sucesso')
+        end
+      end
+
+      response '401', 'Credenciais inválidas' do
+        let(:user) do
+          {
+            user: {
+              email: 'login_test@example.com',
+              password: 'wrong_password'
+            }
+          }
+        end
+
+        run_test! do |response|
+          expect(response).to have_http_status(:unauthorized)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response['error']['message']).to eq('Credenciais inválidas')
+        end
+      end
+    end
+
+    delete 'Realiza logout do usuário' do
+      tags 'Authentication'
+      description 'Invalida a sessão do usuário atual'
+      produces 'application/json'
+      security [ Bearer: [] ]
+
+      response '200', 'Logout realizado com sucesso' do
+        let(:user) { create(:user) }
+        let(:Authorization) { "Bearer #{user.generate_jwt_token}" }
+
+        run_test! do |response|
+          expect(response).to have_http_status(:ok)
+          json_response = JSON.parse(response.body)
+          expect(json_response['meta']['message']).to eq('Logout realizado com sucesso')
+        end
+      end
+
+      response '401', 'Token inválido' do
+        let(:Authorization) { 'Bearer invalid_token' }
+
+        run_test! do |response|
+          expect(response).to have_http_status(:unauthorized)
+          json_response = JSON.parse(response.body)
+          expect(json_response['error']['message']).to eq('Não autorizado')
+        end
+      end
+    end
+  end
+
+  path '/api/v1/sessions/current' do
+    get 'Obtém informações do usuário atual' do
+      tags 'Authentication'
+      description 'Retorna as informações do usuário autenticado'
+      produces 'application/json'
+      security [ Bearer: [] ]
+
+      response '200', 'Usuário atual retornado com sucesso' do
+        let(:user) { create(:user) }
+        let(:Authorization) { "Bearer #{user.generate_jwt_token}" }
+
+        run_test! do |response|
+          expect(response).to have_http_status(:ok)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response['data']['data']['attributes']['email']).to eq(user.email)
+        end
+      end
+
+      response '401', 'Token inválido' do
+        let(:Authorization) { 'Bearer invalid_token' }
+
+        run_test! do |response|
+          expect(response).to have_http_status(:unauthorized)
+
+          json_response = JSON.parse(response.body)
+          expect(json_response['error']['message']).to eq('Não autorizado')
+        end
+      end
+    end
+  end
+
+  # Mantendo os testes originais para garantir cobertura completa
   describe 'POST /api/v1/sessions' do
     let!(:user) { create(:user, email: 'login_test@example.com', password: 'password123') }
 

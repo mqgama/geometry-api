@@ -1,0 +1,469 @@
+---
+openapi: 3.0.1
+info:
+  title: Geometry API
+  version: v1
+  description: API para gerenciamento de frames e círculos geométricos com autenticação
+    JWT
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+paths:
+  "/api/v1/circles":
+    get:
+      summary: Lista todos os círculos
+      tags:
+      - Circles
+      description: Retorna uma lista de círculos com filtros opcionais
+      security:
+      - Bearer: []
+      parameters:
+      - name: frame_id
+        in: query
+        required: false
+        description: ID do frame
+        schema:
+          type: integer
+      - name: center_x
+        in: query
+        required: false
+        description: Coordenada X do centro
+        schema:
+          type: number
+      - name: center_y
+        in: query
+        required: false
+        description: Coordenada Y do centro
+        schema:
+          type: number
+      - name: radius
+        in: query
+        required: false
+        description: Raio de busca
+        schema:
+          type: number
+      responses:
+        '200':
+          description: Lista de círculos retornada com sucesso
+  "/api/v1/frames/{frame_id}/circles":
+    parameters:
+    - name: frame_id
+      in: path
+      description: ID do frame
+      required: true
+      schema:
+        type: integer
+    post:
+      summary: Cria um novo círculo em um frame
+      tags:
+      - Circles
+      description: Adiciona um novo círculo a um frame específico
+      security:
+      - Bearer: []
+      parameters: []
+      responses:
+        '201':
+          description: Círculo criado com sucesso
+        '422':
+          description: Dados inválidos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                circle:
+                  type: object
+                  properties:
+                    center_x:
+                      type: number
+                      format: float
+                      example: 100.0
+                    center_y:
+                      type: number
+                      format: float
+                      example: 100.0
+                    diameter:
+                      type: number
+                      format: float
+                      example: 50.0
+                  required:
+                  - center_x
+                  - center_y
+                  - diameter
+              required:
+              - circle
+  "/api/v1/circles/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: ID do círculo
+      required: true
+      schema:
+        type: integer
+    put:
+      summary: Atualiza um círculo
+      tags:
+      - Circles
+      description: Atualiza as propriedades de um círculo existente
+      security:
+      - Bearer: []
+      parameters: []
+      responses:
+        '200':
+          description: Círculo atualizado com sucesso
+        '404':
+          description: Círculo não encontrado
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                circle:
+                  type: object
+                  properties:
+                    center_x:
+                      type: number
+                      format: float
+                      example: 100.0
+                    center_y:
+                      type: number
+                      format: float
+                      example: 100.0
+                    diameter:
+                      type: number
+                      format: float
+                      example: 50.0
+              required:
+              - circle
+    delete:
+      summary: Remove um círculo
+      tags:
+      - Circles
+      description: Remove um círculo do sistema
+      security:
+      - Bearer: []
+      responses:
+        '204':
+          description: Círculo removido com sucesso
+        '404':
+          description: Círculo não encontrado
+  "/api/v1/frames":
+    post:
+      summary: Cria um novo frame
+      tags:
+      - Frames
+      description: Cria um novo frame geométrico
+      security:
+      - Bearer: []
+      parameters: []
+      responses:
+        '201':
+          description: Frame criado com sucesso
+        '422':
+          description: Dados inválidos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                frame:
+                  type: object
+                  properties:
+                    center_x:
+                      type: number
+                      format: float
+                      example: 100.0
+                    center_y:
+                      type: number
+                      format: float
+                      example: 100.0
+                    width:
+                      type: number
+                      format: float
+                      example: 200.0
+                    height:
+                      type: number
+                      format: float
+                      example: 150.0
+                  required:
+                  - center_x
+                  - center_y
+                  - width
+                  - height
+              required:
+              - frame
+  "/api/v1/frames/{id}":
+    parameters:
+    - name: id
+      in: path
+      description: ID do frame
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Obtém um frame específico
+      tags:
+      - Frames
+      description: Retorna informações detalhadas de um frame
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: Frame encontrado
+        '404':
+          description: Frame não encontrado
+    delete:
+      summary: Remove um frame
+      tags:
+      - Frames
+      description: Remove um frame do sistema
+      security:
+      - Bearer: []
+      responses:
+        '204':
+          description: Frame removido com sucesso
+        '422':
+          description: Frame possui círculos
+        '404':
+          description: Frame não encontrado
+  "/api/v1/sessions":
+    post:
+      summary: Realiza login do usuário
+      tags:
+      - Authentication
+      description: Autentica um usuário e retorna um token JWT
+      parameters: []
+      responses:
+        '200':
+          description: Login realizado com sucesso
+        '401':
+          description: Credenciais inválidas
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      example: login_test@example.com
+                    password:
+                      type: string
+                      example: password123
+                  required:
+                  - email
+                  - password
+              required:
+              - user
+    delete:
+      summary: Realiza logout do usuário
+      tags:
+      - Authentication
+      description: Invalida a sessão do usuário atual
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: Logout realizado com sucesso
+        '401':
+          description: Token inválido
+  "/api/v1/sessions/current":
+    get:
+      summary: Obtém informações do usuário atual
+      tags:
+      - Authentication
+      description: Retorna as informações do usuário autenticado
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: Usuário atual retornado com sucesso
+        '401':
+          description: Token inválido
+  "/api/v1/users":
+    post:
+      summary: Cria um novo usuário
+      tags:
+      - Users
+      description: Registra um novo usuário no sistema e retorna um token JWT
+      parameters: []
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+        '422':
+          description: Dados inválidos
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: Test User
+                    email:
+                      type: string
+                      example: test@example.com
+                    password:
+                      type: string
+                      example: password123
+                    password_confirmation:
+                      type: string
+                      example: password123
+                  required:
+                  - name
+                  - email
+                  - password
+                  - password_confirmation
+              required:
+              - user
+servers:
+- url: http://localhost:3000
+  description: Development server
+- url: https://api.example.com
+  description: Production server
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido através do endpoint de login
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: João Silva
+        email:
+          type: string
+          example: joao@example.com
+        created_at:
+          type: string
+          format: date_time
+        updated_at:
+          type: string
+          format: date_time
+    Frame:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        center_x:
+          type: number
+          format: float
+          example: 100.0
+        center_y:
+          type: number
+          format: float
+          example: 100.0
+        width:
+          type: number
+          format: float
+          example: 200.0
+        height:
+          type: number
+          format: float
+          example: 150.0
+        left:
+          type: number
+          format: float
+          example: 0.0
+        right:
+          type: number
+          format: float
+          example: 200.0
+        top:
+          type: number
+          format: float
+          example: 175.0
+        bottom:
+          type: number
+          format: float
+          example: 25.0
+        circles_count:
+          type: integer
+          example: 3
+        created_at:
+          type: string
+          format: date_time
+        updated_at:
+          type: string
+          format: date_time
+    Circle:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        center_x:
+          type: number
+          format: float
+          example: 100.0
+        center_y:
+          type: number
+          format: float
+          example: 100.0
+        diameter:
+          type: number
+          format: float
+          example: 50.0
+        radius:
+          type: number
+          format: float
+          example: 25.0
+        frame_id:
+          type: integer
+          example: 1
+        created_at:
+          type: string
+          format: date_time
+        updated_at:
+          type: string
+          format: date_time
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Erro de validação
+            details:
+              type: string
+              example: Detalhes do erro
+            timestamp:
+              type: string
+              format: date_time
+    Success:
+      type: object
+      properties:
+        data:
+          type: object
+        meta:
+          type: object
+          properties:
+            message:
+              type: string
+              example: Operação realizada com sucesso
+            timestamp:
+              type: string
+              format: date_time
