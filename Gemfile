@@ -10,7 +10,13 @@ gem "puma", ">= 5.0"
 # gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
+
+# JWT authentication
+gem "jwt"
+
+# Pagination
+gem "kaminari"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -35,6 +41,9 @@ gem "thruster", require: false
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 # gem "rack-cors"
 
+# JSON API serialization
+gem "jsonapi-serializer"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
@@ -42,6 +51,30 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
+  # Check for vulnerable versions of gems [https://github.com/rubysec/bundler-audit]
+  gem "bundler-audit", require: false
+
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Testing framework
+  gem "rspec-rails"
+
+  # Factory for creating test data
+  gem "factory_bot_rails"
+
+  # Generate fake data for tests
+  gem "faker"
+
+  # Swagger/OpenAPI documentation
+  gem "rswag"
+
+  # Database cleaner for tests
+  gem "database_cleaner-active_record"
+
+  # Code coverage
+  gem "simplecov", require: false
+
+  # Shoulda matchers for testing validations and associations
+  gem "shoulda-matchers"
 end
