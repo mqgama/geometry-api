@@ -12,6 +12,8 @@ RSpec.describe Api::V1::CirclesController, type: :request do
       parameter name: :center_x, in: :query, type: :number, required: false, description: 'Coordenada X do centro'
       parameter name: :center_y, in: :query, type: :number, required: false, description: 'Coordenada Y do centro'
       parameter name: :radius, in: :query, type: :number, required: false, description: 'Raio de busca'
+      parameter name: :page, in: :query, type: :integer, required: false, description: 'Número da página (padrão: 1)'
+      parameter name: :per_page, in: :query, type: :integer, required: false, description: 'Itens por página (padrão: 20, máximo: 100)'
 
       response '200', 'Lista de círculos retornada com sucesso' do
         let(:user) { create(:user) }
@@ -27,6 +29,7 @@ RSpec.describe Api::V1::CirclesController, type: :request do
 
           json_response = JSON.parse(response.body)
           expect(json_response['data']['data']).to be_an(Array)
+          expect(json_response['meta']).to include('total', 'total_pages', 'current_page', 'per_page')
         end
       end
     end
@@ -213,6 +216,7 @@ RSpec.describe Api::V1::CirclesController, type: :request do
 
   # Mantendo os testes originais para garantir cobertura completa
   let(:frame) { create(:frame, center_x: 100.0, center_y: 100.0, width: 200.0, height: 150.0) }
+  let(:large_frame) { create(:frame, center_x: 5000.0, center_y: 5000.0, width: 2000.0, height: 2000.0) }
 
   describe 'GET /api/v1/circles' do
   before do
@@ -231,6 +235,69 @@ RSpec.describe Api::V1::CirclesController, type: :request do
         expect(json_response['data']['data'].length).to eq(3)
         expect(json_response['meta']['total']).to eq(3)
         expect(json_response['meta']['filters_applied']).to be_empty
+      end
+    end
+
+    context 'with pagination' do
+      before do
+        # Create more circles to test pagination using FactoryBot
+        # Using large frame with small circles well spaced apart
+        # Frame limits: left: 4000, right: 6000, top: 6000, bottom: 4000
+        7.times do |i|
+          create(:circle, frame: large_frame, center_x: 4100.0 + i * 100, center_y: 4100.0 + i * 100, diameter: 20.0)
+        end
+      end
+
+      it 'returns paginated results with default per_page' do
+        get '/api/v1/circles', headers: auth_headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['data']['data'].length).to eq(10) # 3 original + 7 new circles
+        expect(json_response['meta']['total']).to eq(10)
+        expect(json_response['meta']['current_page']).to eq(1)
+        expect(json_response['meta']['per_page']).to eq(20)
+        expect(json_response['meta']['total_pages']).to eq(1)
+      end
+
+      it 'returns paginated results with custom per_page' do
+        get '/api/v1/circles?per_page=5', headers: auth_headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['data']['data'].length).to eq(5)
+        expect(json_response['meta']['total']).to eq(10)
+        expect(json_response['meta']['current_page']).to eq(1)
+        expect(json_response['meta']['per_page']).to eq(5)
+        expect(json_response['meta']['total_pages']).to eq(2)
+        expect(json_response['meta']['next_page']).to eq(2)
+        expect(json_response['meta']['prev_page']).to be_nil
+      end
+
+      it 'returns second page results' do
+        get '/api/v1/circles?page=2&per_page=5', headers: auth_headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['data']['data'].length).to eq(5)
+        expect(json_response['meta']['total']).to eq(10)
+        expect(json_response['meta']['current_page']).to eq(2)
+        expect(json_response['meta']['per_page']).to eq(5)
+        expect(json_response['meta']['total_pages']).to eq(2)
+        expect(json_response['meta']['next_page']).to be_nil
+        expect(json_response['meta']['prev_page']).to eq(1)
+      end
+
+      it 'respects maximum per_page limit' do
+        get '/api/v1/circles?per_page=200', headers: auth_headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        expect(json_response['meta']['per_page']).to eq(100) # max limit
       end
     end
 

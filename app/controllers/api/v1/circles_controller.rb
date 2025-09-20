@@ -5,11 +5,19 @@ class Api::V1::CirclesController < ApiController
   def index
     service = CircleSearchService.new(search_params)
     circles = service.call
+    
+    # Apply pagination
+    paginated_circles = circles.page(params[:page]).per(params[:per_page])
 
     render_success(
-      CircleSerializer.new(circles).serializable_hash,
+      CircleSerializer.new(paginated_circles).serializable_hash,
       meta: {
         total: circles.count,
+        total_pages: paginated_circles.total_pages,
+        current_page: paginated_circles.current_page,
+        per_page: paginated_circles.limit_value,
+        next_page: paginated_circles.next_page,
+        prev_page: paginated_circles.prev_page,
         filters_applied: applied_filters
       }
     )
@@ -50,7 +58,7 @@ class Api::V1::CirclesController < ApiController
   end
 
   def search_params
-    params.permit(:center_x, :center_y, :radius, :frame_id)
+    params.permit(:center_x, :center_y, :radius, :frame_id, :page, :per_page)
   end
 
   def applied_filters

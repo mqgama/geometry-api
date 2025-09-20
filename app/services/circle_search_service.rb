@@ -21,14 +21,10 @@ class CircleSearchService
   private
 
   def filter_circles_within_radius(circles)
-    circles.select do |circle|
-      distance = Math.sqrt(
-        (circle.center_x - @center_x)**2 +
-        (circle.center_y - @center_y)**2
-      )
-
-      # Verifica se o círculo está completamente dentro do raio especificado
-      distance + circle.radius <= @radius
-    end
+    # Use SQL to filter circles within radius for better performance and Kaminari compatibility
+    circles.where(
+      "SQRT(POWER(center_x - ?, 2) + POWER(center_y - ?, 2)) + (diameter / 2) <= ?",
+      @center_x, @center_y, @radius
+    )
   end
 end

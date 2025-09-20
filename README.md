@@ -152,6 +152,31 @@ curl -X GET http://localhost:3000/api/v1/sessions/current \
 - `PUT /api/v1/circles/{id}` - Atualizar círculo
 - `DELETE /api/v1/circles/{id}` - Remover círculo
 
+## 📄 Paginação
+
+Todos os endpoints que retornam listas suportam paginação:
+
+### Parâmetros de Paginação
+- `page` - Número da página (padrão: 1)
+- `per_page` - Itens por página (padrão: 20, máximo: 100)
+
+### Exemplo de Resposta com Paginação
+```json
+{
+  "data": {
+    "data": [...],
+    "meta": {
+      "total": 150,
+      "total_pages": 8,
+      "current_page": 1,
+      "per_page": 20,
+      "next_page": 2,
+      "prev_page": null
+    }
+  }
+}
+```
+
 ## 🔍 Filtros de Busca
 
 ### Círculos com filtros
@@ -164,6 +189,10 @@ GET /api/v1/circles?center_x=100&center_y=100&radius=50
 
 # Combinados
 GET /api/v1/circles?frame_id=1&center_x=100&center_y=100&radius=50
+
+# Com paginação
+GET /api/v1/circles?page=1&per_page=10
+GET /api/v1/circles?frame_id=1&page=2&per_page=5
 ```
 
 ## 🏗️ Arquitetura
