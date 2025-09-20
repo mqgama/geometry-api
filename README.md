@@ -20,13 +20,40 @@ Uma API RESTful para gerenciamento de frames e círculos geométricos com autent
 
 ## 🛠️ Instalação e Configuração
 
-### 1. Clone o repositório
+### 🚀 Setup Automatizado (Recomendado)
+
+Para uma configuração rápida e completa, use o script de setup:
+
 ```bash
-git clone <repository-url>
+# Clone o repositório
+git clone https://github.com/mqgama/geometry-api
+cd geometry-api
+
+# Execute o setup automatizado
+./bin/setup-dev
+```
+
+O script `setup-dev` automatiza todo o processo:
+- ✅ Verifica dependências (Docker, Docker Compose)
+- ✅ Cria arquivo `.env` se necessário
+- ✅ Inicia serviços Docker
+- ✅ Instala dependências Ruby
+- ✅ Configura banco de dados
+- ✅ Executa testes para validação
+- ✅ Gera documentação Swagger
+- ✅ Executa verificações de segurança e qualidade
+
+### 🔧 Setup Manual
+
+Se preferir configurar manualmente:
+
+#### 1. Clone o repositório
+```bash
+git clone https://github.com/mqgama/geometry-api
 cd geometry-api
 ```
 
-### 2. Configure as variáveis de ambiente
+#### 2. Configure as variáveis de ambiente
 ```bash
 # Copie o arquivo de exemplo
 cp .env.example .env
@@ -35,7 +62,7 @@ cp .env.example .env
 nano .env
 ```
 
-### 3. Inicie os serviços
+#### 3. Inicie os serviços
 ```bash
 # Inicie o banco de dados e a aplicação
 docker compose up -d
@@ -44,7 +71,7 @@ docker compose up -d
 docker compose logs -f geometry-api
 ```
 
-### 4. Execute as migrações
+#### 4. Execute as migrações
 ```bash
 docker compose exec geometry-api bundle exec rails db:migrate
 ```
@@ -204,6 +231,9 @@ RAILS_MASTER_KEY=your_master_key
 
 ### Comandos Úteis
 ```bash
+# Setup completo do ambiente (recomendado para novos devs)
+./bin/setup-dev
+
 # Console Rails
 docker compose exec geometry-api bundle exec rails console
 
@@ -254,6 +284,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 ## 🆘 Suporte
 
 Para dúvidas ou problemas:
-- Abra uma [issue](https://github.com/seu-usuario/geometry-api/issues)
+- Abra uma [issue](https://github.com/mqgama/geometry-api/issues)
 - Consulte a [documentação Swagger](http://localhost:3000/api-docs/index.html)
-- Verifique os [logs](http://localhost:3000/logs) da aplicação
+- Verifique os logs da aplicação: `docker compose logs -f geometry-api`
