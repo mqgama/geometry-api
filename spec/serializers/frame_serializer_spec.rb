@@ -27,9 +27,9 @@ RSpec.describe FrameSerializer do
     it 'includes circles count' do
       create(:circle, frame: frame, center_x: 100.0, center_y: 100.0, diameter: 50.0)
       create(:circle, frame: frame, center_x: 150.0, center_y: 80.0, diameter: 30.0)
-      
+
       serialized = FrameSerializer.new(frame).serializable_hash
-      
+
       expect(serialized[:data][:attributes][:circles_count]).to eq(2)
     end
 
@@ -37,7 +37,7 @@ RSpec.describe FrameSerializer do
       circle = create(:circle, frame: frame, center_x: 100.0, center_y: 100.0, diameter: 50.0)
 
       serialized = FrameSerializer.new(frame).serializable_hash
-      
+
       expect(serialized[:data][:relationships][:circles][:data]).to include(
         { id: circle.id.to_s, type: :circle }
       )
